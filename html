@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Binary Tree Traversal Visualizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .level {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+
+    .node {
+      width: 40px;
+      height: 40px;
+      background-color: #e0e0e0;
+      border: 2px solid #444;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 10px;
+      transition: background-color 0.3s ease;
+      font-weight: bold;
+    }
+
+    .highlight {
+      background-color: yellow !important;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    .controls button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .output {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Binary Tree Traversal Visualizer</h1>
+
+  <div class="tree" id="tree"></div>
+
+  <div class="controls">
+    <button onclick="traverse('inorder')">Inorder</button>
+    <button onclick="traverse('preorder')">Preorder</button>
+    <button onclick="traverse('postorder')">Postorder</button>
+  </div>
+
+  <div class="output" id="output"></div>
+
+  <script>
+    const treeStructure = {
+      value: 1,
+      left: {
+        value: 2,
+        left: { value: 4 },
+        right: { value: 5 }
+      },
+      right: {
+        value: 3,
+        right: { value: 6 }
+      }
+    };
+
+    function createTreeHTML(tree, container, level = 0) {
+      if (!tree) return;
+
+      let levelContainer = container.querySelector(`.level[data-level='${level}']`);
+      if (!levelContainer) {
+        levelContainer = document.createElement('div');
+        levelContainer.className = 'level';
+        levelContainer.dataset.level = level;
+        container.appendChild(levelContainer);
+      }
+
+      const nodeEl = document.createElement('div');
+      nodeEl.className = 'node';
+      nodeEl.id = `node-${tree.value}`;
+      nodeEl.innerText = tree.value;
+      levelContainer.appendChild(nodeEl);
+
+      if (tree.left) createTreeHTML(tree.left, container, level + 1);
+      if (tree.right) createTreeHTML(tree.right, container, level + 1);
+    }
+
+    function traverse(type) {
+      const sequence = [];
+
+      function inorder(node) {
+        if (!node) return;
+        inorder(node.left);
+        sequence.push(node.value);
+        inorder(node.right);
+      }
+
+      function preorder(node) {
+        if (!node) return;
+        sequence.push(node.value);
+        preorder(node.left);
+        preorder(node.right);
+      }
+
+      function postorder(node) {
+        if (!node) return;
+        postorder(node.left);
+        postorder(node.right);
+        sequence.push(node.value);
+      }
+
+      if (type === 'inorder') inorder(treeStructure);
+      if (type === 'preorder') preorder(treeStructure);
+      if (type === 'postorder') postorder(treeStructure);
+
+      document.getElementById("output").innerText = type.charAt(0).toUpperCase() + type.slice(1) + " Traversal: " + sequence.join(" ");
+      animateTraversal(sequence);
+    }
+
+    function animateTraversal(sequence) {
+      let i = 0;
+
+      document.querySelectorAll('.node').forEach(node => node.classList.remove('highlight'));
+
+      function highlightNext() {
+        if (i > 0) {
+          document.getElementById(`node-${sequence[i - 1]}`).classList.remove('highlight');
+        }
+
+        if (i < sequence.length) {
+          const node = document.getElementById(`node-${sequence[i]}`);
+          node.classList.add('highlight');
+          i++;
+          setTimeout(highlightNext, 1000);
+        }
+      }
+
+      highlightNext();
+    }
+
+    window.onload = () => {
+      const treeContainer = document.getElementById('tree');
+      createTreeHTML(treeStructure, treeContainer);
+    };
+  </script>
+</body>
+</html>
